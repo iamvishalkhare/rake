@@ -1,0 +1,106 @@
+Angular Router is one of the many quiet useful modules of Angular framework. We will have a look on how to create angular 6 routes and navigate through them.
+
+First of all create a new project with or without a --routing flag.
+
+ng new myproject --routing will create an angular project named myproject with a routes files where you can define your own Routes variable. where as ng new myproject will create an angular project named myproject without a routes file. In this case you create your routes variable in the app.module.ts file itself. I prefer the latter one. Following is how my app.module.ts looks like after i am done defining the Routes variable
+
+import { BrowserModule } from ‘@angular/platform-browser’;
+import { NgModule } from ‘@angular/core’;
+import { Router, RouterModule, Routes } from '@angular/router';
+import { SearcherComponent } from './components/searcher/searcher.component';
+import { LanderComponent } from './components/lander/lander.component';
+const routes: Routes = [
+  { path: ‘’, redirectTo: ‘lander’, pathMatch: ‘full’ },
+  { path: ‘search’, component: SearcherComponent},
+  { path: ‘lander’, component: LanderComponent},
+  { path: ‘**’, component: LanderComponent }
+];
+@NgModule({
+  declarations: [
+    AppComponent,
+    SearcherComponent,
+    LanderComponent ],
+  imports: [
+    BrowserModule,
+    RouterModule
+]})
+export class AppModule { }
+I basically have two more components called SearcherComponent & LanderComponent apart from AppComponent. My app.component.html file has only a <router-outlet></router-outlet> tag. By default when the application loads, The LanderComponent gets loaded in <router-outlet></router-outlet> because of the following line in app.module.ts — { path: ‘’, redirectTo: ‘lander’, pathMatch: ‘full’ } 
+The LanderComponent might have a button or a logic that can then navigate to SearcherComponent. For example let’s say the lander component has a button on click of which we wish to navigate to SearcherComponent
+
+HTML of LanderComponent is as follows
+<button (click)="navigate()">Navigate to SearcherComponent</button>
+
+Now in .ts file of LanderComponent import the Router as follows
+
+import { Router} from ‘@angular/router’;
+
+Then create an object of Router by passing it through constructor of LanderComponent as follows-
+
+constructor(private router: Router){}
+
+After that write a function in .ts file of LanderComponent.
+
+function navigate(){
+    this.router.navigate([‘search’]);
+}
+Above function will make the application render SearcherComponent in <router-outlet></router-outlet> of app.component.html since SearcherComponent and LanderComponent are both sibling routes. In above function the navigate function of router module takes route path as parameter, in this case it is ‘search’
+
+Passing data with route navigation
+Let’s say in above example we don’t want to just navigate to SearcherComponent on button click but also want to pass some data. This can be a case in form submission where routes gets changed and the form data has to be passed to the next route.
+There are multiple ways one can achieve this but i personally prefer communicating through an angular service.
+
+Let’s take an example that LanderComponent has a text field whose value has to be transferred to SearcherComponent on a button click.
+
+HTML of LanderComponent is as follows
+
+<input type="text" [(ngModel)]="data">
+<button (click)="navigate()">Navigate to SearcherComponent</button>
+We will now create a service to transmit the data between SearcherComponent & LanderComponent
+
+ng g service DataTransmitter
+
+It will create a service. Add a new variable called dataToTransmit to hold the data from LanderComponent. datatransmitter.service.ts will look like below-
+
+import { Injectable } from ‘@angular/core’;
+@Injectable()
+export class MiscApiService {
+constructor() { }
+dataToTransmit:string;
+}
+Now let’s grab the data from text field of LanderComponent in it’s typescript file. lander.component.ts should look like below. It should import the DataTransmitter service.
+
+import { Component, OnInit } from ‘@angular/core’;
+import { Router } from ‘@angular/router’;
+import { DataTransmitter } from './DataTransmitter/datatransmitter.service';
+@Component({
+  selector: ‘app-lander’,
+  templateUrl: ‘./lander.component.html’,
+  styleUrls: [‘./lander.component.css’]
+})
+export class LanderComponent implements OnInit {
+constructor(private dataTransmitter: DataTransmitter, private router: Router) {}
+data: string;
+ngOnInit() {
+}
+navigate(){
+  this.dataTransmitter.dataToTransmit = this.data;
+  this.router.navigate(['search']);
+}
+}
+The above example sets the value in text field to dataToTransmit variable of DataTransmitter service. After which the app navigates to SearcherComponent. Now SearcherComponent will have to import the DataTransmitter and extract the value of its dataToTransmit variable. Following is how SearcherComponent will look like-
+
+import { Component, OnInit } from ‘@angular/core’;
+import { DataTransmitter } from './DataTransmitter/datatransmitter.service';
+@Component({
+  selector: ‘app-searcher’,
+  templateUrl: ‘./searcher.component.html’,
+  styleUrls: [‘./searcher.component.css’]
+})
+export class SearcherComponent implements OnInit {
+constructor(private dataTransmitter: DataTransmitter) {}
+ngOnInit() {
+  console.log(this.dataTransmitter.dataToTransmit);
+}
+}
+As the SearcherComponent will load its ngOnInit() function will log the value that was entered by the user on console. Of course in real world you won’t be logging these values in console but it acts as a proof of concept to show that once you have the value in the route you can do anything with it.
