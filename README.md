@@ -2,6 +2,15 @@
 
 Keywords extraction from a given paragraph of text is what this project does.
 
+## Installing instructions
+1. Clone the repo
+2. mvn clean install
+3. Open RakeAlgorithm.java in STS or eclipse
+4. Right click on the file
+5. Select Run as -> Java application
+
+
+## Output of algorithm
 rakefile.txt in resources folder contains an article written by me on "Angular Routing" - https://medium.com/@iamvishalkhare/angular-routing-navigation-bab9880ec4be
 
 Following are the results along with the score after passing the text of the article mentioned above to the algorithm-
@@ -48,7 +57,7 @@ private dataTransmitter---4.0
 app navigates---4.0
 real world---4.0
 
-
+## Tweaking the algorithm
 To test keyword extraction accuracy and efficiency just change the content of rakefile.txt to your own content. The algorithm will extract keywords from the text in rakefile.txt
 
 One can also tweak the results by adding/removing special characters in loadPunctStopWord() function in RakeAlgorithm.java
